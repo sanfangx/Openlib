@@ -19,6 +19,9 @@ jobs:
           channel: "stable"
           cache: true
 
+      - name: Flutter clean
+        run: flutter clean
+
       - name: Get dependencies
         run: flutter pub get
 
@@ -27,8 +30,16 @@ jobs:
           cd ios
           pod install
 
-      - name: Build unsigned IPA
-        run: flutter build ipa --release --no-codesign
+      - name: Build iOS app (no codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p build/ios/ipa/Payload
+          cp -R build/ios/Release-iphoneos/Runner.app build/ios/ipa/Payload/
+          cd build/ios/ipa
+          zip -r openlib-unsigned.ipa Payload/
+          ls -la *.ipa
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
